@@ -2,6 +2,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+import launch
 
 ################### user configure parameters for ros2 start ###################
 xfer_format   = 0    # 0-Pointcloud2(PointXYZRTL), 1-customized pointcloud format
@@ -15,7 +16,8 @@ cmdline_bd_code = 'livox0000000001'
 
 cur_path = os.path.split(os.path.realpath(__file__))[0] + '/'
 cur_config_path = cur_path + '../config'
-user_config_path = os.path.join(cur_config_path, 'MID360_config.json')
+rviz_config_path = os.path.join(cur_config_path, 'display_point_cloud_ROS2.rviz')
+user_config_path = os.path.join(cur_config_path, 'MID360_config_multiple.json')
 ################### user configure parameters for ros2 end #####################
 
 livox_ros2_params = [
@@ -30,18 +32,23 @@ livox_ros2_params = [
     {"cmdline_input_bd_code": cmdline_bd_code}
 ]
 
+
 def generate_launch_description():
     livox_driver = Node(
         package='livox_ros_driver2',
         executable='livox_ros_driver2_node',
         name='livox_lidar_publisher',
         output='screen',
-        parameters=livox_ros2_params,
-        remappings=[
-            ('/livox/lidar', '/livox/lidar_1')
-        ]
-    )
+        parameters=livox_ros2_params
+        )
+
+    livox_rviz = Node(
+            package='rviz2',
+            executable='rviz2',
+            output='screen',
+            arguments=['--display-config', rviz_config_path]
+        )
 
     return LaunchDescription([
-        livox_driver
+        livox_driver,
     ])
